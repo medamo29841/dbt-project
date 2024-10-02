@@ -1,3 +1,9 @@
+/*
+- install audit helper https://github.com/dbt-labs/dbt-audit-helper/tree/0.12.0/?tab=readme-ov-file#installation-instructions
+- dbt run 
+- hit preview on this query
+*/
+
 {% set old_etl_relation=ref('customer_orders') %} 
 
 {% set dbt_relation=ref('fct_customer_orders') %}  {{ 

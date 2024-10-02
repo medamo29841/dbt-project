@@ -1,32 +1,40 @@
-with
+with 
+
 orders as (
-Select * from  {{ ref("stg_orders") }}
+
+  select * from {{ ref('stg_orders') }}
+
 ),
 
-payment as (
-Select * from  {{ ref("stg_payment") }}
-where payment_status != 'fail'
+payments as (
+
+  select * from {{ ref('stg_payment') }}
+
 ),
 
-order_totals as (
-    Select
+completed_payments as (
+
+  select 
     order_id,
-    payment_status,
-    sum(payment_amount) as order_value_dollars
-    from payment
-    group by 1,2
+    max(payment_created_at) as payment_finalized_date,
+    sum(payment_amount) as total_amount_paid
+  from payments
+  where payment_status <> 'fail'
+  group by 1
 
 ),
 
-order_values_joined as (
+paid_orders as (
 
-    select
-    orders.*,
-    order_totals.payment_status,
-    order_totals.order_value_dollars
-    from orders
-    left join order_totals
-        on orders.order_id = order_totals.order_id
+  select 
+    orders.order_id,
+    orders.customer_id,
+    orders.order_placed_at,
+    orders.order_status,
+    completed_payments.total_amount_paid,
+    completed_payments.payment_finalized_date
+  from orders
+ left join completed_payments on orders.order_id = completed_payments.order_id
 )
 
-select * from order_values_joined
+select * from paid_orders
